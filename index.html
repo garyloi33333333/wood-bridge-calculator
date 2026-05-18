@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>木條橋樑用料計算系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root,[data-theme="light"]{
+  --color-bg:#f6f5f1;--color-surface:#fafaf7;--color-surface-2:#ffffff;
+  --color-surface-offset:#f0ede8;--color-surface-dynamic:#e8e5e0;
+  --color-divider:#dbd8d2;--color-border:#ccc9c2;
+  --color-text:#22201a;--color-text-muted:#747270;--color-text-faint:#b8b6b1;--color-text-inverse:#f9f8f4;
+  --color-primary:#01696f;--color-primary-hover:#0c4e54;--color-primary-highlight:#cedcd8;
+  --color-success:#437a22;--color-success-hover:#2e5c10;--color-success-highlight:#d4dfcc;
+  --color-warning:#964219;--color-warning-hover:#713417;--color-warning-highlight:#ddcfc6;
+  --color-error:#a12c7b;--color-error-hover:#7d1e5e;--color-error-highlight:#e0ced7;
+  --color-orange:#da7101;--color-orange-highlight:#e7d7c4;
+  --color-gold:#9a6f00;--color-gold-highlight:#e9e0c6;
+  --radius-sm:.375rem;--radius-md:.5rem;--radius-lg:.75rem;--radius-xl:1rem;--radius-full:9999px;
+  --shadow-sm:0 1px 2px oklch(.2 .01 80/.06);--shadow-md:0 4px 12px oklch(.2 .01 80/.08);--shadow-lg:0 12px 32px oklch(.2 .01 80/.12);
+  --transition-interactive:180ms cubic-bezier(.16,1,.3,1);
+  --text-xs:clamp(.75rem,.7rem + .25vw,.875rem);--text-sm:clamp(.875rem,.8rem + .35vw,1rem);
+  --text-base:clamp(1rem,.95rem + .25vw,1.125rem);--text-lg:clamp(1.125rem,1rem + .75vw,1.5rem);
+  --text-xl:clamp(1.5rem,1.2rem + 1.25vw,2.25rem);
+  --space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;
+  --space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;--space-12:3rem;--space-16:4rem;
+  --font-body:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;
+  --font-mono:'JetBrains Mono','Courier New',monospace;
+}
+[data-theme="dark"]{
+  --color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;
+  --color-surface-offset:#1d1c1a;--color-surface-dynamic:#2d2c2a;
+  --color-divider:#262523;--color-border:#393836;
+  --color-text:#cdccca;--color-text-muted:#797876;--color-text-faint:#5a5957;--color-text-inverse:#2b2a28;
+  --color-primary:#4f98a3;--color-primary-hover:#227f8b;--color-primary-highlight:#313b3b;
+  --color-success:#6daa45;--color-success-hover:#4d8f25;--color-success-highlight:#3a4435;
+  --color-warning:#bb653b;--color-warning-hover:#b95525;--color-warning-highlight:#564942;
+  --color-error:#d163a7;--color-error-hover:#b9478f;--color-error-highlight:#4c3d46;
+  --color-orange:#fdab43;--color-orange-highlight:#564b3e;
+  --color-gold:#e8af34;--color-gold-highlight:#4d4332;
+  --shadow-sm:0 1px 2px oklch(0 0 0/.2);--shadow-md:0 4px 12px oklch(0 0 0/.3);--shadow-lg:0 12px 32px oklch(0 0 0/.4);
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme]){
+  --color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;
+  --color-surface-offset:#1d1c1a;--color-surface-dynamic:#2d2c2a;
+  --color-divider:#262523;--color-border:#393836;
+  --color-text:#cdccca;--color-text-muted:#797876;--color-text-faint:#5a5957;--color-text-inverse:#2b2a28;
+  --color-primary:#4f98a3;--color-primary-hover:#227f8b;--color-primary-highlight:#313b3b;
+  --color-success:#6daa45;--color-success-highlight:#3a4435;
+  --color-warning:#bb653b;--color-warning-highlight:#564942;
+  --color-error:#d163a7;--color-error-highlight:#4c3d46;
+  --color-orange:#fdab43;--color-gold:#e8af34;
+}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-sm);color:var(--color-text);background:var(--color-bg);line-height:1.6}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+input,select,textarea{font:inherit;color:inherit}
+table{border-collapse:collapse;width:100%}
+:focus-visible{outline:2px solid var(--color-primary);outline-offset:3px;border-radius:var(--radius-sm)}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--color-surface-dynamic);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:var(--color-border)}
+
+/* HEADER */
+.app-header{background:var(--color-surface);border-bottom:1px solid var(--color-divider);padding:var(--space-3) var(--space-6);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm)}
+.app-logo{display:flex;align-items:center;gap:var(--space-3)}
+.logo-icon{width:32px;height:32px;color:var(--color-primary)}
+.app-title{font-size:var(--text-base);font-weight:700;color:var(--color-text);letter-spacing:-.01em}
+.app-subtitle{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:1px}
+.header-actions{display:flex;align-items:center;gap:var(--space-2)}
+
+/* STATS BAR */
+.stats-bar{background:var(--color-surface);border-bottom:1px solid var(--color-divider);padding:var(--space-3) var(--space-6);display:flex;gap:var(--space-4);overflow-x:auto;flex-wrap:wrap}
+.stat-item{display:flex;flex-direction:column;gap:2px;min-width:100px}
+.stat-label{font-size:var(--text-xs);color:var(--color-text-muted);white-space:nowrap}
+.stat-value{font-size:var(--text-sm);font-weight:600;font-family:var(--font-mono);color:var(--color-text);white-space:nowrap}
+.stat-value.primary{color:var(--color-primary)}.stat-value.success{color:var(--color-success)}.stat-value.warning{color:var(--color-warning)}.stat-value.error{color:var(--color-error)}
+.stat-divider{width:1px;background:var(--color-divider);align-self:stretch;margin:2px 0}
+
+/* LAYOUT */
+.app-content{display:grid;grid-template-columns:300px 1fr 1fr 1fr;gap:0;height:calc(100dvh - 112px);overflow:hidden}
+.panel{display:flex;flex-direction:column;border-right:1px solid var(--color-divider);overflow:hidden;background:var(--color-bg)}
+.panel:last-child{border-right:none}
+.panel-header{padding:var(--space-3) var(--space-4);background:var(--color-surface);border-bottom:1px solid var(--color-divider);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.panel-title{font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-muted)}
+.panel-badge{font-size:var(--text-xs);font-family:var(--font-mono);padding:2px 6px;border-radius:var(--radius-full);font-weight:600}
+.panel-body{flex:1;min-height:0;overflow-y:auto;padding:var(--space-3) var(--space-4);display:flex;flex-direction:column;gap:var(--space-2)}
+
+/* INPUT PANEL */
+.input-panel{grid-column:1;grid-row:1/3;background:var(--color-surface);display:flex;flex-direction:column;overflow:hidden}
+.input-panel-body{flex:1;min-height:0;overflow-y:auto}
+.input-section{padding:var(--space-4);border-bottom:1px solid var(--color-divider)}
+.section-title{font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-muted);margin-bottom:var(--space-3);display:flex;align-items:center;gap:var(--space-2)}
+.section-title::before{content:'';display:inline-block;width:3px;height:12px;background:var(--color-primary);border-radius:2px}
+.form-row{display:grid;grid-template-columns:1fr 1fr auto;gap:var(--space-2);margin-bottom:var(--space-2);align-items:end}
+.form-row-2{display:grid;grid-template-columns:1fr auto;gap:var(--space-2);margin-bottom:var(--space-2);align-items:end}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-label{font-size:var(--text-xs);color:var(--color-text-muted);font-weight:500}
+.form-input{padding:var(--space-2) var(--space-3);background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:var(--text-sm);width:100%;transition:border-color var(--transition-interactive),box-shadow var(--transition-interactive)}
+.form-input:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px oklch(from var(--color-primary) l c h / .15)}
+.input-with-suffix{display:flex}
+.input-with-suffix .form-input{border-radius:var(--radius-md) 0 0 var(--radius-md)}
+.input-suffix{font-size:var(--text-xs);color:var(--color-text-muted);padding:var(--space-2) var(--space-3);background:var(--color-surface-offset);border:1px solid var(--color-border);border-left:none;border-radius:0 var(--radius-md) var(--radius-md) 0;white-space:nowrap;align-self:stretch;display:flex;align-items:center}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);padding:var(--space-2) var(--space-4);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:500;white-space:nowrap;transition:background var(--transition-interactive),color var(--transition-interactive),border-color var(--transition-interactive);cursor:pointer}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--color-primary);color:var(--color-text-inverse);border:1px solid transparent}.btn-primary:hover{background:var(--color-primary-hover)}
+.btn-secondary{background:var(--color-surface-offset);color:var(--color-text);border:1px solid var(--color-border)}.btn-secondary:hover{background:var(--color-surface-dynamic)}
+.btn-success{background:var(--color-success);color:#fff;border:1px solid transparent}.btn-success:hover{background:var(--color-success-hover)}
+.btn-danger{background:transparent;color:var(--color-error);border:1px solid var(--color-border)}.btn-danger:hover{background:var(--color-error-highlight);border-color:var(--color-error)}
+.btn-sm{padding:4px var(--space-3);font-size:var(--text-xs)}
+.btn-full{width:100%}
+.btn-icon{padding:var(--space-2);border-radius:var(--radius-md);background:transparent;border:none;color:var(--color-text-muted)}.btn-icon:hover{background:var(--color-surface-offset);color:var(--color-text)}
+
+/* LIST ITEMS */
+.list-item{background:var(--color-surface);border:1px solid var(--color-divider);border-radius:var(--radius-md);padding:var(--space-3);display:flex;flex-direction:column;gap:var(--space-1);transition:box-shadow var(--transition-interactive)}
+.list-item:hover{box-shadow:var(--shadow-sm);border-color:var(--color-border)}
+.list-item-header{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2)}
+.item-id{font-family:var(--font-mono);font-size:var(--text-xs);font-weight:500;color:var(--color-primary);background:var(--color-primary-highlight);padding:2px 6px;border-radius:var(--radius-sm)}
+.item-id.residual{color:var(--color-orange);background:var(--color-orange-highlight)}
+.item-length{font-family:var(--font-mono);font-size:var(--text-sm);font-weight:600;color:var(--color-text)}
+.item-meta{font-size:var(--text-xs);color:var(--color-text-muted)}
+.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px}
+.status-dot.available{background:var(--color-success)}.status-dot.residual{background:var(--color-orange)}
+.progress-bar{width:100%;height:4px;background:var(--color-surface-dynamic);border-radius:var(--radius-full);overflow:hidden}
+.progress-fill{height:100%;background:var(--color-primary);border-radius:var(--radius-full);transition:width .3s ease}
+
+/* EMPTY STATE */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:var(--space-8);color:var(--color-text-muted);flex:1;gap:var(--space-3)}
+.empty-state svg{color:var(--color-text-faint)}
+.empty-state p{font-size:var(--text-xs);max-width:20ch}
+
+/* CUT RECORD — grouped per wood strip */
+.cut-record{background:var(--color-surface);border:1px solid var(--color-divider);border-radius:var(--radius-md);padding:var(--space-3);transition:box-shadow var(--transition-interactive)}
+.cut-record:hover{box-shadow:var(--shadow-sm)}
+.cut-record-header{display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-2)}
+.cut-strip-id{font-family:var(--font-mono);font-size:var(--text-xs);font-weight:600;color:var(--color-primary);background:var(--color-primary-highlight);padding:2px 8px;border-radius:var(--radius-sm)}
+.cut-strip-id.residual-src{color:var(--color-orange);background:var(--color-orange-highlight)}
+.cut-strip-total{font-size:var(--text-xs);color:var(--color-text-muted);font-family:var(--font-mono)}
+/* The usage equation row: 250mm + 50mm = 300mm */
+.cut-equation{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:var(--space-2)}
+.cut-eq-seg{font-family:var(--font-mono);font-size:var(--text-sm);font-weight:700;padding:2px 8px;border-radius:var(--radius-sm)}
+.cut-eq-seg.used{background:var(--color-primary-highlight);color:var(--color-primary)}
+.cut-eq-seg.residual{background:var(--color-orange-highlight);color:var(--color-orange)}
+.cut-eq-seg.free{background:var(--color-success-highlight);color:var(--color-success)}
+.cut-eq-op{font-size:var(--text-xs);color:var(--color-text-faint);font-weight:500}
+.cut-eq-total{font-family:var(--font-mono);font-size:var(--text-xs);color:var(--color-text-muted);margin-left:4px}
+/* individual cut detail lines */
+.cut-lines{display:flex;flex-direction:column;gap:3px}
+.cut-line{display:flex;align-items:center;gap:6px;font-size:var(--text-xs);color:var(--color-text-muted)}
+.cut-line-seq{font-family:var(--font-mono);color:var(--color-text-faint);min-width:28px}
+.cut-line-len{font-family:var(--font-mono);font-weight:600;color:var(--color-text)}
+.cut-line-badge{padding:1px 5px;border-radius:var(--radius-sm);font-size:10px;font-weight:500}
+.cut-line-badge.used{background:var(--color-primary-highlight);color:var(--color-primary)}
+.cut-line-badge.residual{background:var(--color-orange-highlight);color:var(--color-orange)}
+.cut-line-note{color:var(--color-text-faint)}
+
+/* VISUAL BAR inside cut record */
+.strip-vis{display:flex;height:16px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--color-border);gap:1px;background:var(--color-border);margin-bottom:var(--space-2)}
+.strip-vis-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;font-family:var(--font-mono);overflow:hidden;white-space:nowrap}
+.strip-vis-seg.used{background:var(--color-primary);color:var(--color-text-inverse)}
+.strip-vis-seg.residual{background:var(--color-orange);color:#fff}
+.strip-vis-seg.free{background:var(--color-success-highlight);color:var(--color-success)}
+
+/* TOAST */
+.toast-container{position:fixed;bottom:var(--space-6);right:var(--space-6);z-index:9999;display:flex;flex-direction:column;gap:var(--space-2);pointer-events:none}
+.toast{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-3) var(--space-4);box-shadow:var(--shadow-lg);font-size:var(--text-sm);max-width:340px;animation:slideIn .25s cubic-bezier(.16,1,.3,1);display:flex;align-items:flex-start;gap:var(--space-2)}
+.toast.success{border-left:3px solid var(--color-success)}.toast.error{border-left:3px solid var(--color-error)}.toast.warning{border-left:3px solid var(--color-warning)}
+@keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:oklch(.1 0 0/.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:var(--space-4)}
+.modal{background:var(--color-surface);border-radius:var(--radius-xl);padding:var(--space-6);max-width:400px;width:100%;box-shadow:var(--shadow-lg)}
+.modal-title{font-size:var(--text-base);font-weight:700;margin-bottom:var(--space-4)}
+.modal-actions{display:flex;gap:var(--space-2);justify-content:flex-end;margin-top:var(--space-6)}
+
+.theme-toggle{background:none;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-2);color:var(--color-text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background var(--transition-interactive)}
+.theme-toggle:hover{background:var(--color-surface-offset);color:var(--color-text)}
+
+@media(max-width:1100px){.app-content{grid-template-columns:260px 1fr 1fr 1fr}}
+@media(max-width:900px){.app-content{grid-template-columns:1fr;height:auto;overflow:visible}.input-panel{grid-column:1;grid-row:auto;max-height:none}.panel{max-height:450px}}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-logo">
+    <svg class="logo-icon" viewBox="0 0 32 32" fill="none" aria-label="木條橋樑計算系統">
+      <rect x="2" y="20" width="28" height="4" rx="1.5" fill="currentColor" opacity="0.3"/>
+      <rect x="6" y="16" width="3" height="8" rx="1" fill="currentColor"/>
+      <rect x="23" y="16" width="3" height="8" rx="1" fill="currentColor"/>
+      <rect x="2" y="14" width="28" height="3" rx="1.5" fill="currentColor"/>
+      <rect x="4" y="8" width="2" height="9" rx="1" fill="currentColor" opacity="0.7"/>
+      <rect x="9" y="8" width="2" height="9" rx="1" fill="currentColor" opacity="0.7"/>
+      <rect x="14" y="8" width="2" height="9" rx="1" fill="currentColor" opacity="0.7"/>
+      <rect x="19" y="8" width="2" height="9" rx="1" fill="currentColor" opacity="0.7"/>
+      <rect x="24" y="8" width="2" height="9" rx="1" fill="currentColor" opacity="0.7"/>
+    </svg>
+    <div>
+      <div class="app-title">木條橋樑用料計算系統</div>
+      <div class="app-subtitle">智慧裁切配料 · 零浪費管理</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-secondary btn-sm" onclick="exportReport()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      匯出清單
+    </button>
+    <button class="theme-toggle" data-theme-toggle aria-label="切換主題">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="stats-bar">
+  <div class="stat-item"><span class="stat-label">原材料總數</span><span class="stat-value primary" id="stat-total">0 根</span></div>
+  <div class="stat-divider"></div>
+  <div class="stat-item"><span class="stat-label">原材料總長度</span><span class="stat-value" id="stat-total-len">0 mm</span></div>
+  <div class="stat-divider"></div>
+  <div class="stat-item"><span class="stat-label">完整木條剩餘</span><span class="stat-value success" id="stat-intact">0 根</span></div>
+  <div class="stat-divider"></div>
+  <div class="stat-item"><span class="stat-label">殘料數量</span><span class="stat-value" id="stat-residual-count" style="color:var(--color-orange)">0 段</span></div>
+  <div class="stat-divider"></div>
+  <div class="stat-item"><span class="stat-label">殘料總長度</span><span class="stat-value" id="stat-residual-len" style="color:var(--color-orange)">0 mm</span></div>
+  <div class="stat-divider"></div>
+  <div class="stat-item"><span class="stat-label">裁切次數</span><span class="stat-value" id="stat-cuts">0 次</span></div>
+  <div class="stat-divider"></div>
+  <div class="stat-item"><span class="stat-label">材料利用率</span><span class="stat-value success" id="stat-efficiency">—</span></div>
+</div>
+
+<div class="app-content">
+
+  <!-- PANEL 1: INPUT -->
+  <aside class="panel input-panel">
+    <div class="panel-header">
+      <span class="panel-title">操作面板</span>
+    </div>
+    <div class="input-panel-body">
+      <div class="input-section">
+        <div class="section-title">新增原材料</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">長度 (mm)</label>
+            <input type="number" class="form-input" id="inp-length" placeholder="如 300" min="1" step="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">數量 (根)</label>
+            <input type="number" class="form-input" id="inp-qty" placeholder="如 10" min="1" step="1" value="1">
+          </div>
+          <div class="form-group" style="align-self:end">
+            <button class="btn btn-primary btn-sm" onclick="addMaterial()" title="新增原材料">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+        </div>
+        <div style="display:flex;gap:var(--space-2);flex-wrap:wrap;margin-top:var(--space-1)">
+          <button class="btn btn-secondary btn-sm" onclick="quickAdd(300)">+300mm</button>
+          <button class="btn btn-secondary btn-sm" onclick="quickAdd(200)">+200mm</button>
+          <button class="btn btn-secondary btn-sm" onclick="quickAdd(150)">+150mm</button>
+          <button class="btn btn-secondary btn-sm" onclick="quickAdd(100)">+100mm</button>
+        </div>
+      </div>
+
+      <div class="input-section">
+        <div class="section-title">執行裁切</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">所需長度 (mm)</label>
+            <div class="input-with-suffix">
+              <input type="number" class="form-input" id="inp-cut" placeholder="如 250" min="1" step="1">
+              <div class="input-suffix">mm</div>
+            </div>
+          </div>
+          <div class="form-group" style="align-self:end">
+            <button class="btn btn-success btn-sm" onclick="performCut()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+              裁切
+            </button>
+          </div>
+        </div>
+        <div id="cut-preview" style="font-size:var(--text-xs);color:var(--color-text-muted);min-height:18px;margin-top:var(--space-1)"></div>
+      </div>
+
+      <div class="input-section">
+        <div class="section-title">批量裁切</div>
+        <div class="form-group" style="margin-bottom:var(--space-2)">
+          <label class="form-label">多筆長度，用逗號或換行分隔 (mm)</label>
+          <textarea class="form-input" id="inp-batch" placeholder="例：250,180,120&#10;或每行一筆" rows="3" style="resize:vertical;line-height:1.6"></textarea>
+        </div>
+        <button class="btn btn-primary btn-sm btn-full" onclick="performBatchCut()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          批量裁切分配
+        </button>
+      </div>
+
+      <div class="input-section">
+        <div class="section-title">管理操作</div>
+        <div style="display:flex;flex-direction:column;gap:var(--space-2)">
+          <button class="btn btn-secondary btn-sm btn-full" onclick="undoLastCut()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+            撤銷最後一次裁切
+          </button>
+          <button class="btn btn-danger btn-sm btn-full" onclick="showClearDialog()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            清空所有紀錄
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- PANEL 2: CUT RECORDS (grouped by strip) -->
+  <section class="panel" style="grid-column:2">
+    <div class="panel-header">
+      <span class="panel-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:-1px;margin-right:4px"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+        裁切使用紀錄
+      </span>
+      <span class="panel-badge" id="badge-cuts" style="background:var(--color-surface-offset);color:var(--color-text-muted)">0 根</span>
+    </div>
+    <div class="panel-body" id="list-cuts">
+      <div class="empty-state">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+        <p>尚無裁切紀錄<br>請先新增原材料並執行裁切</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 3: INTACT STOCK -->
+  <section class="panel" style="grid-column:3">
+    <div class="panel-header">
+      <span class="panel-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:-1px;margin-right:4px"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        完整木條庫存
+      </span>
+      <span class="panel-badge" id="badge-intact" style="background:var(--color-success-highlight);color:var(--color-success)">0 根</span>
+    </div>
+    <div class="panel-body" id="list-intact">
+      <div class="empty-state">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <p>尚無完整木條<br>請在左側面板新增原材料</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 4: RESIDUALS -->
+  <section class="panel" style="grid-column:4">
+    <div class="panel-header">
+      <span class="panel-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:-1px;margin-right:4px"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>
+        殘料庫存
+      </span>
+      <span class="panel-badge" id="badge-residuals" style="background:var(--color-orange-highlight);color:var(--color-orange)">0 段</span>
+    </div>
+    <div class="panel-body" id="list-residuals">
+      <div class="empty-state">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>
+        <p>尚無殘料<br>裁切後的剩餘段落會顯示在此</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<div class="modal-overlay" id="clear-dialog" style="display:none">
+  <div class="modal">
+    <div class="modal-title">確認清空所有紀錄？</div>
+    <p style="font-size:var(--text-sm);color:var(--color-text-muted)">此操作將清除所有原材料、裁切紀錄及殘料資料，無法復原。</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="hideClearDialog()">取消</button>
+      <button class="btn btn-danger" onclick="clearAll()">確認清空</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════ STATE ═══════════════════
+let state = {
+  // strips: each original wood piece, tracks all segments
+  // { id, totalLen, segs: [{type:'used'|'residual'|'free', len, cutSeq?, residualId?}] }
+  strips: [],
+  // cuts: each individual cut action
+  // { seq, needed, stripId, srcType:'new'|'residual', leftover, leftoverId }
+  cuts: [],
+  idCounter: 0,
+  residualCounter: 0,
+  cutCounter: 0,
+  history: [],
+};
+
+function genW(){ state.idCounter++; return `W-${String(state.idCounter).padStart(3,'0')}`; }
+function genR(){ state.residualCounter++; return `R-${String(state.residualCounter).padStart(3,'0')}`; }
+
+// ═══════════════════ FIND BEST SOURCE ═══════════════════
+// Returns info about the best segment to use, or null
+function findBestSource(needed) {
+  // 1. Find shortest RESIDUAL segment that fits
+  let bestRes = null;
+  state.strips.forEach((strip, si) => {
+    strip.segs.forEach((seg, gi) => {
+      if (seg.type === 'residual' && seg.len >= needed) {
+        if (!bestRes || seg.len < bestRes.seg.len) {
+          bestRes = { strip, si, seg, gi, srcType: 'residual' };
+        }
+      }
+    });
+  });
+  if (bestRes) return bestRes;
+
+  // 2. Find shortest FREE (intact) strip that fits
+  let bestFree = null;
+  state.strips.forEach((strip, si) => {
+    // A strip is "intact" if it has exactly one free segment covering all
+    if (strip.segs.length === 1 && strip.segs[0].type === 'free' && strip.segs[0].len >= needed) {
+      if (!bestFree || strip.segs[0].len < bestFree.seg.len) {
+        bestFree = { strip, si, seg: strip.segs[0], gi: 0, srcType: 'new' };
+      }
+    }
+  });
+  return bestFree;
+}
+
+function getMaxAvailable() {
+  let max = 0;
+  state.strips.forEach(strip => {
+    strip.segs.forEach(seg => {
+      if ((seg.type === 'residual' || seg.type === 'free') && seg.len > max) max = seg.len;
+    });
+  });
+  return max;
+}
+
+// ═══════════════════ ADD MATERIAL ═══════════════════
+function addMaterial(lenOverride, qtyOverride) {
+  const len = lenOverride !== undefined ? parseInt(lenOverride) : parseInt(document.getElementById('inp-length').value);
+  const qty = qtyOverride !== undefined ? parseInt(qtyOverride) : (parseInt(document.getElementById('inp-qty').value) || 1);
+  if (!len || isNaN(len) || len <= 0) {
+    showToast('請先輸入木條長度 (mm)', 'error');
+    document.getElementById('inp-length').focus();
+    return;
+  }
+  const added = [];
+  for (let i = 0; i < qty; i++) {
+    const id = genW();
+    state.strips.push({ id, totalLen: len, segs: [{ type: 'free', len }] });
+    added.push(id);
+  }
+  updateUI();
+  showToast(`已新增 ${qty} 根 ${len}mm 木條（${added[0]}${qty > 1 ? ' ~ ' + added[added.length-1] : ''}）`, 'success');
+  document.getElementById('inp-length').value = '';
+  document.getElementById('inp-qty').value = '1';
+  document.getElementById('inp-length').focus();
+}
+
+function quickAdd(len) {
+  const id = genW();
+  state.strips.push({ id, totalLen: len, segs: [{ type: 'free', len }] });
+  updateUI();
+  showToast(`快速新增 ${len}mm 木條 (${id})`, 'success');
+}
+
+// ═══════════════════ PERFORM CUT ═══════════════════
+function performCut(lenOverride) {
+  const needed = lenOverride !== undefined ? lenOverride : parseInt(document.getElementById('inp-cut').value);
+  if (!needed || isNaN(needed) || needed <= 0) {
+    showToast('請輸入有效裁切長度', 'error');
+    document.getElementById('inp-cut').focus();
+    return false;
+  }
+  const found = findBestSource(needed);
+  if (!found) {
+    showToast(`❌ 庫存不足！需要 ${needed}mm，最長可用 ${getMaxAvailable()}mm`, 'warning');
+    return false;
+  }
+
+  state.history.push(JSON.parse(JSON.stringify(state)));
+  state.cutCounter++;
+
+  const { strip, si, seg, gi, srcType } = found;
+  const leftover = seg.len - needed;
+
+  // Replace the segment in place
+  const newSegs = [];
+  strip.segs.forEach((s, idx) => {
+    if (idx < gi) { newSegs.push(s); return; }
+    if (idx === gi) {
+      // used portion
+      newSegs.push({ type: 'used', len: needed, cutSeq: state.cutCounter });
+      // leftover
+      if (leftover > 0) {
+        const rid = genR();
+        newSegs.push({ type: 'residual', len: leftover, residualId: rid, cutSeq: state.cutCounter });
+      }
+      return;
+    }
+    newSegs.push(s);
+  });
+  strip.segs = newSegs;
+
+  const leftoverId = leftover > 0 ? strip.segs.find(s => s.cutSeq === state.cutCounter && s.type === 'residual')?.residualId : null;
+
+  state.cuts.push({
+    seq: state.cutCounter,
+    needed,
+    stripId: strip.id,
+    srcType,
+    leftover,
+    leftoverId,
+  });
+
+  updateUI();
+  const srcLabel = srcType === 'residual' ? `殘料段 (${seg.residualId})` : `原木 ${strip.id}`;
+  const msg = leftover > 0
+    ? `✂ ${needed}mm 裁自 ${srcLabel}，剩餘 ${leftover}mm 存為殘料 (${leftoverId})`
+    : `✂ ${needed}mm 裁自 ${srcLabel}，整段用盡`;
+  showToast(msg, 'success');
+  if (lenOverride === undefined) { document.getElementById('inp-cut').value = ''; document.getElementById('inp-cut').focus(); }
+  return true;
+}
+
+// ═══════════════════ BATCH CUT ═══════════════════
+function performBatchCut() {
+  const raw = document.getElementById('inp-batch').value.trim();
+  if (!raw) { showToast('請輸入批量裁切長度', 'error'); return; }
+  const parts = raw.split(/[,，\n\s]+/).map(s => parseInt(s.trim())).filter(n => n > 0 && !isNaN(n));
+  if (!parts.length) { showToast('格式錯誤，請輸入數字', 'error'); return; }
+  let ok = 0, fail = [];
+  parts.forEach(len => { if (performCut(len)) ok++; else fail.push(len); });
+  document.getElementById('inp-batch').value = '';
+  if (fail.length) showToast(`批量完成：成功 ${ok} 筆，${fail.join(', ')}mm 庫存不足`, 'warning');
+  else showToast(`批量裁切完成：共 ${ok} 筆`, 'success');
+}
+
+// ═══════════════════ UNDO ═══════════════════
+function undoLastCut() {
+  if (!state.history.length) { showToast('無可撤銷的操作', 'warning'); return; }
+  state = state.history.pop();
+  updateUI();
+  showToast('已撤銷最後一次裁切', 'success');
+}
+
+// ═══════════════════ CLEAR ═══════════════════
+function showClearDialog(){ document.getElementById('clear-dialog').style.display='flex'; }
+function hideClearDialog(){ document.getElementById('clear-dialog').style.display='none'; }
+function clearAll(){
+  state = { strips:[], cuts:[], idCounter:0, residualCounter:0, cutCounter:0, history:[] };
+  hideClearDialog(); updateUI(); showToast('所有紀錄已清空', 'success');
+}
+
+// ═══════════════════ CUT PREVIEW ═══════════════════
+document.getElementById('inp-cut').addEventListener('input', function() {
+  const needed = parseInt(this.value);
+  const el = document.getElementById('cut-preview');
+  if (!needed || needed <= 0) { el.innerHTML = ''; return; }
+  const found = findBestSource(needed);
+  if (!found) {
+    el.innerHTML = `<span style="color:var(--color-error)">⚠ 庫存不足，最長可用 ${getMaxAvailable()}mm</span>`;
+  } else {
+    const lo = found.seg.len - needed;
+    const src = found.srcType === 'residual' ? `殘料 (${found.seg.residualId})` : `原木 ${found.strip.id}`;
+    el.innerHTML = `<span style="color:var(--color-success)">✓ 來源：${src}（${found.seg.len}mm），裁後剩 ${lo}mm</span>`;
+  }
+});
+
+// ═══════════════════ UPDATE STATS ═══════════════════
+function updateStats() {
+  // intact = strips with only one free seg
+  const intact = state.strips.filter(s => s.segs.length === 1 && s.segs[0].type === 'free');
+  const intactLen = intact.reduce((a, s) => a + s.totalLen, 0);
+  const residuals = [];
+  state.strips.forEach(s => s.segs.forEach(seg => { if (seg.type === 'residual') residuals.push(seg); }));
+  const residualLen = residuals.reduce((a, s) => a + s.len, 0);
+  const usedLen = state.cuts.reduce((a, c) => a + c.needed, 0);
+  const totalLen = state.strips.reduce((a, s) => a + s.totalLen, 0);
+  const util = totalLen > 0 ? (usedLen / totalLen * 100).toFixed(1) : null;
+
+  document.getElementById('stat-total').textContent = `${state.strips.length} 根`;
+  document.getElementById('stat-total-len').textContent = `${intactLen.toLocaleString()} mm`;
+  document.getElementById('stat-intact').textContent = `${intact.length} 根`;
+  document.getElementById('stat-residual-count').textContent = `${residuals.length} 段`;
+  document.getElementById('stat-residual-len').textContent = `${residualLen.toLocaleString()} mm`;
+  document.getElementById('stat-cuts').textContent = `${state.cutCounter} 次`;
+  document.getElementById('stat-efficiency').textContent = util !== null ? `${util}%` : '—';
+
+  document.getElementById('badge-cuts').textContent = `${state.strips.filter(s=>s.segs.some(g=>g.type==='used')).length} 根`;
+  document.getElementById('badge-intact').textContent = `${intact.length} 根`;
+  document.getElementById('badge-residuals').textContent = `${residuals.length} 段`;
+}
+
+// ═══════════════════ RENDER CUT RECORDS (grouped by strip) ═══════════════════
+function renderCuts() {
+  const el = document.getElementById('list-cuts');
+  // Only show strips that have at least one 'used' segment
+  const usedStrips = state.strips.filter(s => s.segs.some(seg => seg.type === 'used'));
+
+  if (usedStrips.length === 0) {
+    el.innerHTML = `<div class="empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg><p>尚無裁切紀錄<br>請先新增原材料並執行裁切</p></div>`;
+    return;
+  }
+
+  el.innerHTML = usedStrips.map(strip => {
+    // Build the equation: 250mm + 50mm (residual) = 300mm
+    const eqParts = strip.segs.map(seg => {
+      if (seg.type === 'used') return `<span class="cut-eq-seg used">${seg.len}mm</span>`;
+      if (seg.type === 'residual') return `<span class="cut-eq-seg residual">${seg.len}mm</span>`;
+      return `<span class="cut-eq-seg free">${seg.len}mm</span>`;
+    });
+    const eqHtml = eqParts.join('<span class="cut-eq-op"> + </span>') +
+      `<span class="cut-eq-total">= ${strip.totalLen}mm</span>`;
+
+    // Visual bar
+    const barSegs = strip.segs.map(seg => {
+      const pct = (seg.len / strip.totalLen * 100).toFixed(2);
+      const label = seg.len / strip.totalLen > 0.12 ? `${seg.len}` : '';
+      return `<div class="strip-vis-seg ${seg.type}" style="flex:${pct}" title="${seg.len}mm">${label}</div>`;
+    }).join('');
+
+    // Individual cut lines for this strip
+    const cutsForStrip = state.cuts.filter(c => c.stripId === strip.id);
+    const cutLines = cutsForStrip.map(c => {
+      const loNote = c.leftover > 0
+        ? `<span class="cut-line-badge residual">殘料 ${c.leftoverId}</span><span class="cut-line-note">${c.leftover}mm</span>`
+        : `<span class="cut-line-note" style="color:var(--color-text-faint)">整段用盡</span>`;
+      return `<div class="cut-line">
+        <span class="cut-line-seq">#${String(c.seq).padStart(3,'0')}</span>
+        <span class="cut-line-len">${c.needed}mm</span>
+        <span class="cut-line-badge used">已用</span>
+        ${loNote}
+      </div>`;
+    }).join('');
+
+    // Determine if any source was residual
+    const hasResidualSrc = cutsForStrip.some(c => c.srcType === 'residual');
+
+    return `<div class="cut-record">
+      <div class="cut-record-header">
+        <span class="cut-strip-id">${strip.id}</span>
+        <span class="cut-strip-total">${strip.totalLen}mm</span>
+      </div>
+      <div class="strip-vis">${barSegs}</div>
+      <div class="cut-equation">${eqHtml}</div>
+      <div class="cut-lines">${cutLines}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════ RENDER INTACT ═══════════════════
+function renderIntact() {
+  const el = document.getElementById('list-intact');
+  const intact = state.strips.filter(s => s.segs.length === 1 && s.segs[0].type === 'free');
+  if (intact.length === 0) {
+    el.innerHTML = `<div class="empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="12" x2="16" y2="12"/></svg><p>尚無完整木條<br>請在左側面板新增原材料</p></div>`;
+    return;
+  }
+  el.innerHTML = intact.map(s => `
+    <div class="list-item">
+      <div class="list-item-header">
+        <span class="item-id">${s.id}</span>
+        <span class="item-length">${s.totalLen} mm</span>
+      </div>
+      <div class="item-meta"><span class="status-dot available"></span>可用 · 完整木條</div>
+      <div style="margin-top:var(--space-1)"><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div></div>
+    </div>`).join('');
+}
+
+// ═══════════════════ RENDER RESIDUALS ═══════════════════
+function renderResiduals() {
+  const el = document.getElementById('list-residuals');
+  const residuals = [];
+  state.strips.forEach(strip => {
+    strip.segs.forEach(seg => {
+      if (seg.type === 'residual') residuals.push({ ...seg, stripId: strip.id, stripTotal: strip.totalLen });
+    });
+  });
+  if (residuals.length === 0) {
+    el.innerHTML = `<div class="empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg><p>尚無殘料<br>裁切後的剩餘段落會顯示在此</p></div>`;
+    return;
+  }
+  el.innerHTML = residuals.sort((a,b) => b.len - a.len).map(r => {
+    const pct = Math.round(r.len / r.stripTotal * 100);
+    return `<div class="list-item">
+      <div class="list-item-header">
+        <span class="item-id residual">${r.residualId}</span>
+        <span class="item-length">${r.len} mm</span>
+      </div>
+      <div class="item-meta"><span class="status-dot residual"></span>殘料 · 來源 ${r.stripId}</div>
+      <div style="margin-top:3px"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:var(--color-orange)"></div></div></div>
+      <div class="item-meta" style="font-family:var(--font-mono);margin-top:2px">${r.len}/${r.stripTotal}mm (${pct}%)</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════ UPDATE UI ═══════════════════
+function updateUI() {
+  updateStats();
+  renderCuts();
+  renderIntact();
+  renderResiduals();
+}
+
+// ═══════════════════ TOAST ═══════════════════
+function showToast(msg, type='success') {
+  const c = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  const icon = type==='success'?'✓':type==='error'?'✕':'⚠';
+  const col = type==='success'?'var(--color-success)':type==='error'?'var(--color-error)':'var(--color-warning)';
+  el.innerHTML = `<span style="color:${col};font-weight:700;flex-shrink:0">${icon}</span><span>${msg}</span>`;
+  c.appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transform='translateX(20px)'; el.style.transition='.3s'; setTimeout(()=>el.remove(),320); }, 3800);
+}
+
+// ═══════════════════ EXPORT ═══════════════════
+function exportReport() {
+  const now = new Date().toLocaleString('zh-TW');
+  let t = `木條橋樑用料計算系統 — 匯出報告\n匯出時間：${now}\n${'='.repeat(52)}\n\n`;
+  const usedLen = state.cuts.reduce((s,c)=>s+c.needed,0);
+  const totalLen = state.strips.reduce((s,strip)=>s+strip.totalLen,0);
+  const util = totalLen>0?(usedLen/totalLen*100).toFixed(1):0;
+  t += `【統計】木條共 ${state.strips.length} 根，裁切 ${state.cutCounter} 次，利用率 ${util}%\n\n`;
+  t += `【各木條使用狀況】\n`;
+  state.strips.forEach(strip => {
+    const parts = strip.segs.map(s=>{
+      if(s.type==='used') return `已用${s.len}mm(#${String(s.cutSeq).padStart(3,'0')})`;
+      if(s.type==='residual') return `殘料${s.len}mm(${s.residualId})`;
+      return `可用${s.len}mm`;
+    }).join(' + ');
+    t += `  ${strip.id}  ${strip.totalLen}mm  →  ${parts}\n`;
+  });
+  t += `\n【裁切紀錄】\n`;
+  state.cuts.forEach(c=>{
+    const lo = c.leftover>0?`剩 ${c.leftover}mm→${c.leftoverId}`:'整段用盡';
+    t += `  #${String(c.seq).padStart(3,'0')}  ${c.needed}mm  來源:${c.stripId}(${c.srcType==='residual'?'殘料':'原木'})  ${lo}\n`;
+  });
+  const blob = new Blob([t],{type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`木條用料清單_${new Date().toISOString().slice(0,10)}.txt`; a.click();
+  showToast('報告已匯出','success');
+}
+
+// ═══════════════════ KEYBOARD ═══════════════════
+document.addEventListener('keydown', e => {
+  if (e.key==='Enter' && document.activeElement===document.getElementById('inp-cut')) performCut();
+  if (e.key==='Enter' && document.activeElement===document.getElementById('inp-qty')) addMaterial();
+});
+
+// ═══════════════════ THEME ═══════════════════
+(function(){
+  const btn=document.querySelector('[data-theme-toggle]'),root=document.documentElement;
+  let d=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  root.setAttribute('data-theme',d);
+  const upd=()=>{if(!btn)return;btn.innerHTML=d==='dark'
+    ?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+    :'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';};
+  upd();
+  btn&&btn.addEventListener('click',()=>{d=d==='dark'?'light':'dark';root.setAttribute('data-theme',d);upd();});
+})();
+
+updateUI();
+</script>
+</body>
+</html>
